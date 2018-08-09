@@ -1,3 +1,6 @@
 [submodule "models"]
 	path = models
 	url = https://github.com/tensorflow/models.git
+[submodule "tf_models_experiment_framework"]
+	path = tf_models_experiment_framework
+	url = https://github.com/liumusicforever/tf_models_experiment_framework.git
