@@ -2,30 +2,23 @@ import os
 import sys
 import argparse
 
-path_to_slim = 'models/research/slim/'
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), path_to_slim)))
+path_to_tfexp = 'tf_models_experiment_framework/'
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), path_to_tfexp)))
 
 import tensorflow as tf
 from tensorflow.python.framework import graph_util
 from tensorflow.python.platform import gfile
 
-from nets import nets_factory
+import lib.utils as utils
 
 example_text = '''example:
 
-python3 slim_ckp2pb.py \
+python3 tfexp_ckp2pb.py \
  --ckpt_path   <ckpt_path> \
  --pb_path     <pb_path> \
  --output_node <name of output node> \
- --model_name  <name of network> \
- --num_classes <number of classes>
-
-python3 slim_ckpt2pb.py  \
---ckpt_path  my-models  \
---pb_path test.pb  \
---output_node InceptionResnetV2/Logits/Predictions  \
---model_name  inception_resnet_v2  \
---num_classes 2
+ --network  <path to network> \
+ --image_size 224
 '''
 def parse_args():
     
@@ -38,11 +31,12 @@ def parse_args():
     parser.add_argument('--pb_path', required=True, dest="pb_path", type=str, 
                         help="path to pb")
     parser.add_argument('--output_node', required=True, dest="output_node", type=str, 
-                        help="name of output node ")
-    parser.add_argument('--model_name', required=True, dest="model_name", type=str, 
-                        help="name of network")
-    parser.add_argument('--num_classes', required=True, dest="num_classes", type=int, 
-                        help="number of classes")
+                        help="name of output node , split from ','")
+    parser.add_argument('--network', required=True, dest="network", type=str, 
+                        help="path to network")
+
+    parser.add_argument('--image_size', required=True, dest="image_size", type=int, 
+                        help="size of network")                   
     
     args = parser.parse_args()
 
@@ -50,26 +44,27 @@ def parse_args():
     return args
 
 def main():
-    
     args = parse_args()
     
     ckpt_path = args.ckpt_path
     pb_path = args.pb_path
     output_node = args.output_node
-    model_name = args.model_name
-    num_classes = args.num_classes
-
-    network_fn = nets_factory.get_network_fn(
-        model_name,
-        num_classes=num_classes,
-        is_training=False)
-    image_size = network_fn.default_image_size
+    network = args.network
     
-    image = tf.placeholder(name='input', dtype=tf.float32,
-        shape=[None, image_size,image_size, 3])
-    logits, end_points = network_fn(image)
-    saver = tf.train.Saver()
+    mod_graph , data_iter , params = utils.load_network(args.network)
 
+    # Define the model
+    tf.logging.info("Creating the model...")    
+    image_size = int(args.image_size)
+    image = tf.placeholder(name='input', dtype=tf.float32,
+                                 shape=[None, image_size,
+                                        image_size, 3])
+    
+    net_tensors  = mod_graph.model_fn(image,None,tf.estimator.ModeKeys.PREDICT,params)
+
+    mode , pred_ops = net_tensors[0:2]
+
+    saver = tf.train.Saver()
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
     sess = tf.Session(config=config)
@@ -81,6 +76,7 @@ def main():
         ckpt_path = ckpt_path
     saver.restore(sess, ckpt_path)
 
+    
     # get all var 
     var_list = [n for n in tf.get_default_graph().as_graph_def().node]
     # var_list = [n for n in tf.global_variables()]
