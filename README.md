@@ -12,7 +12,7 @@
 
 # Quick Start
 
-* Convert .pb to tensorrt engine
+## Convert .pb to tensorrt engine
 ```bash
 python3 pb2engine.py  
 --pb_path        <pb_path>  \
@@ -29,7 +29,7 @@ example :
 python3 pb2engine.py  --pb_path model.pb  --engine_path engine.plan  --output_node InceptionResnetV2/Logits/Predictions  --input_node input  --image_size  299  --max_batch_size 40  --max_workspace 20
 ```
 
-* Compare .pb with tensorRT engine
+## Compare .pb with tensorRT engine
 ```bash
 python3 compare_pb2engine.py \
  --compare_images_dir <compare_images_dir>\
@@ -45,7 +45,7 @@ python3 compare_pb2engine.py --pb_path model.pb --engine_path engine.plan --outp
 `compare_pb2engine.py` will generate benchmark report in your current dir which named report_<pb>_<engine.txt>.The benchmark report include fps , mse , diffrent of prediction .
 
 
-* Convert slim model to pb
+## Convert slim model to pb
 ```bash
 python3 slim_ckp2pb.py  \
 --ckpt_path   <ckpt_path>  \
@@ -58,7 +58,7 @@ example:
 ```bash
 python3 slim_ckpt2pb.py  --ckpt_path  my-models  --pb_path model.pb  --output_node InceptionResnetV2/Logits/Predictions  --model_name  inception_resnet_v2  --num_classes 1000
 ```
-* Convert tf experiment model to pb
+## Convert tf experiment model to pb
 ```bash
 python3 tfexp_ckp2pb.py  \
 --ckpt_path   <ckpt_path>  \
