@@ -11,9 +11,9 @@ RUN apt-get update
 
 WORKDIR /root
 
-ADD ./nv-tensorrt-repo-ubuntu1604-ga-cuda9.0-trt3.0.4-20180208_1-1_amd64.deb /root
+ADD ./nv-tensorrt-repo-ubuntu1604-cuda9.0-ga-trt4.0.1.6-20180612_1-1_amd64.deb /root
 
-RUN dpkg -i nv-tensorrt-repo-ubuntu1604-ga-cuda9.0-trt3.0.4-20180208_1-1_amd64.deb
+RUN dpkg -i nv-tensorrt-repo-ubuntu1604-cuda9.0-ga-trt4.0.1.6-20180612_1-1_amd64.deb
 RUN apt-get update
 RUN apt-get install -y tensorrt
 
